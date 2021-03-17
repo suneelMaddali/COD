@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="@drawable/bgm"
+    android:layout_height="match_parent">
+
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Detecting the co2 levels"
+        android:textColor="#001440"
+        android:background="#e5ccc9"
+        tools:layout_editor_absoluteX="162dp"
+        tools:layout_editor_absoluteY="59dp" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="180dp"
+        android:layout_height="74dp"
+        android:background="#e5ccc9"
+        android:text="A alaram will be notified when the co2 levels reach a high values"
+        android:textColor="#001440"
+        tools:layout_editor_absoluteX="78dp"
+        tools:layout_editor_absoluteY="214dp" />
+</androidx.constraintlayout.widget.ConstraintLayout>
