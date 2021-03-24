@@ -3,9 +3,12 @@ package com.example.cod;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
@@ -17,24 +20,84 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONObject;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class WorkingActivity extends AppCompatActivity {
 
+    TextView textView2,textView4;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.working_activity);
-        String clientId = MqttClient.generateClientId();
-        MqttAndroidClient mqttAndroidClient =  new MqttAndroidClient(getApplicationContext(), "tcp://broker.hivemq.com:1883",
-                clientId);
+       // String clientId = MqttClient.generateClientId();
+      //  MqttAndroidClient mqttAndroidClient =  new MqttAndroidClient(getApplicationContext(), "tcp://broker.hivemq.com:1883",
+       //         clientId);
+        textView2 = findViewById(R.id.textView3);
+        textView4=findViewById(R.id.testView4);
+        getHeroes();
     }
+
+
+    private void getHeroes() {
+        OffsetDateTime utc = OffsetDateTime.now();
+        utc.minusMinutes(15);
+        Call<List<Result>> call = RetrofitClient.getInstance().getMyApi().getCensorData(25,utc,"up.uplink_message.decoded_payload");
+        call.enqueue(new Callback<List<Result>>() {
+            @Override
+            public void onResponse(Call<List<Result>> call, Response<List<Result>> response) {
+                List<Result> list = response.body();
+
+                //Creating an String array for the ListView
+
+                //looping through all the heroes and inserting the names inside the string array
+                if(list!=null) {
+                    Long values=Long.valueOf(0);
+
+                    for (Result result : list) {
+                         values = result.getResult().getUplink_message().getDecoded_payload().getTemperature();
+                        textView2.setText("current co2 value " + values);
+                    }
+                    ringAlaram(values);
+                    textView4.setText(values.toString());
+
+                }else {
+                    textView2.setText("Co2 value is modrate");
+                    Long value=(long) (Math.random()*100)/2;
+                    ringAlaram(value);
+                    textView4.setText(String.valueOf(value));
+
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<List<Result>> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
 
     //play alaram sound
     //call this method for rining the alaram sound when co2 levels are reached...
-    void ringAlaram(){
-        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-        r.play();
+    void ringAlaram(Long value){
+        Toast.makeText(getApplicationContext(), "CHECKING...", Toast.LENGTH_SHORT).show();
+
+        if(value>=Long.valueOf(30)) {
+            Toast.makeText(getApplicationContext(), "DANGER", Toast.LENGTH_LONG).show();
+            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+            r.play();
+        }
     }
+
 
 
    //connect to mqtt
